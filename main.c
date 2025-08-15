@@ -2,8 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <unistd.h>
+#include <conio.h>
 #include <windows.h>
 #define NUM_BUCKETS 1000
 
@@ -55,57 +55,36 @@ int login() {
     char username[50];
     char password[50];
     FILE *file;
-    // struct termios old_tio, new_tio;
-    // char ch;
 
-    // printf("Welcome to Cloud9 Systems! \n\n");
-    // printf("Login: \n");
-    // printf("Username: ");
-    // scanf("%s", username);
-    // fflush(stdin);
-    // getchar();
-
-    // printf("Password: ");
-    // tcgetattr(STDIN_FILENO, &old_tio);
-    // new_tio = old_tio;
-    // new_tio.c_lflag &= ~(ICANON | ECHO);
-    // tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
-
-    // int i = 0;
-    // while (scanf("%c", &ch) && ch != '\n') {
-    //     if (ch != '\n') {
-    //         password[i++] = ch;
-    //         putchar('*');
-    //         fflush(stdout);
-    //     }
-    // }
-    // password[i] = '\0';
-    // tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+    printf("Welcome to Cloud9 Systems! \n\n");
+    printf("Login: \n");
+    printf("Username: ");
+    scanf("%s", username);
+    fflush(stdin);
+    getchar();
 
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode;
     GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT)); // Disable echoing
+    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
 
     printf("Password: ");
-    char password[50];
     int i = 0;
     char ch;
 
-    while ((ch = _getch()) != '\r' && i < sizeof(password) - 1) { // Read until Enter or buffer full
-        if (ch == '\b') { // Handle backspace
+    while ((ch = _getch()) != '\r') {
+        if (ch == '\b') {
             if (i > 0) {
                 i--;
-                printf("\b \b"); // Erase asterisk
+                printf("\b \b");
             }
         } else {
             password[i++] = ch;
             printf("*");
         }
     }
-    password[i] = '\0'; // Null-terminate the string
-
-    SetConsoleMode(hStdin, mode); // Re-enable echoing
+    password[i] = '\0';
+    SetConsoleMode(hStdin, mode);
 
     file = fopen("login.txt", "r");
     if (file == NULL) {
@@ -130,7 +109,7 @@ void display_orders() {
         printf("No orders found.\n\n");
     } else {
         for (int j = 0; j < order_count; j++) {
-            printf("%d  - Name: %s,  Order ID: %ld, Total Price: $%.2f\n", 
+            printf("%d  - Name: %s,  Order ID: %ld, Total Price: $%.2f\n",
             j+1, orders[j].username, orders[j].order_id, orders[j].total_price);
         }
         printf("\n");
@@ -224,13 +203,13 @@ void search_order() {
         long order_id = atol(search_id);
         for(int i=0; i<order_count; i++) {
             if(orders[i].order_id == order_id) {
-                printf("Order found:\n");
+                printf("\nOrder found!\n");
+                printf("Name: %s\n", orders[i].username);
                 printf("Order ID: %ld\n", orders[i].order_id);
-                printf("Username: %s\n", orders[i].username);
                 printf("Total Price: $%.2f\n", orders[i].total_price);
                 printf("Products in order:\n");
                 for(int j=0; j<orders[i].product_count; j++) {
-                    printf("%s - $%.2f\n", orders[i].products[j].name, orders[i].products[j].price);
+                    printf("    %d) %s - $%.2f\n\n",j+1, orders[i].products[j].name, orders[i].products[j].price);
                 }
                 break;
             }
