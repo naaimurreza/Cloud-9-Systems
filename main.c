@@ -298,6 +298,4 @@ void edit_order(Order *order) {
 
     strcpy(order->username, new_name);
     printf("Order edited successfully! \n\n");
-
-
 }
