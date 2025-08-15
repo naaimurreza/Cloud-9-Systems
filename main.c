@@ -66,8 +66,8 @@ int main() {
                     search_order();
                     break;
                 case 4:
-                    int order_num;
                     if(display_orders()) {
+                        int order_num;
                         printf("Select order to edit: ");
                         scanf("%d", &order_num);
                         Order *order_ptr = &orders[order_num - 1];
@@ -235,8 +235,9 @@ void make_order() {
     int product_choice;
     scanf("%d", &product_choice);
     if (product_choice < 1 || product_choice > 5) {
-        printf("Invalid product selection.\n");
+        printf("Invalid product selection. adminTry again.\n");
         make_order();
+
     } else {
         char username[50];
         printf("Enter Username: ");
@@ -263,7 +264,7 @@ void display_order(int order_num) {
     printf("Order ID: %ld\n", orders[order_num].order_id);
     printf("Total Price: $%.2f\n", orders[order_num].total_price);
     printf("Products in order:\n");
-    for(int j=0; j<orders[order_num].product_count; j++) {
+    for(int j=0; j<orders[order_num].product_count+1; j++) {
         printf("    %d) %s - $%.2f\n\n",j+1, orders[order_num].products[j].name, orders[order_num].products[j].price);
     }
 }
@@ -282,11 +283,23 @@ void search_order() {
             }
         }
     } else {
+        int flag = 0;
+        printf("\nOrders Found: \n\n");
         for(int i=0; i<order_count; i++) {
-            if(strcmp(orders[i].username, search_id) == 0) {
-                display_order(i);
-                break;
+            for(int j=0; j<strlen(search_id); j++) {
+                if(search_id[j] == orders[i].username[j]) {
+                    flag = 1;
+                } else {
+                    flag = 0;
+                    break;
+                }
             }
+            if(flag) {
+                display_order(i);
+            }
+        }
+        if(!flag) {
+            printf("No orders found!\n\n");
         }
     }
 }

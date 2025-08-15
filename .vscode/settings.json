@@ -1,0 +1,6 @@
+{
+    "C_Cpp.default.compilerPath": "c:\\Program Files\\CodeBlocks\\MinGW\\bin\\clang.exe",
+    "files.associations": {
+        "windows.h": "c"
+    }
+}
