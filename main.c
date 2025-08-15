@@ -6,6 +6,8 @@
 #include <conio.h>
 #include <windows.h>
 #define NUM_BUCKETS 1000
+#define USERNAME "admin"
+#define PASSWORD "password"
 
 struct product {
     char name[50];
@@ -56,6 +58,11 @@ int login() {
     char password[50];
     FILE *file;
 
+    file = fopen("login.txt", "w");
+    fprintf(file,"%ld", hash(PASSWORD));
+    fclose(file);
+
+
     printf("Welcome to Cloud9 Systems! \n\n");
     printf("Login: \n");
     printf("Username: ");
@@ -95,7 +102,7 @@ int login() {
     fscanf(file, "%s", saved_password);
     fclose(file);
 
-    if(strcmp(username, "admin") == 0 && hash(password) == atoi(saved_password)) {
+    if(strcmp(username, USERNAME) == 0 && hash(password) == atoi(saved_password)) {
         printf("\n\nLogin successful!\nHello, %s!\n\n", username);
         return 1;
     } else {
@@ -203,7 +210,7 @@ void search_order() {
         long order_id = atol(search_id);
         for(int i=0; i<order_count; i++) {
             if(orders[i].order_id == order_id) {
-                printf("\nOrder found!\n");
+                printf("\nOrder found!\n\n");
                 printf("Name: %s\n", orders[i].username);
                 printf("Order ID: %ld\n", orders[i].order_id);
                 printf("Total Price: $%.2f\n", orders[i].total_price);
@@ -264,7 +271,8 @@ int main() {
                 }
             }
         } else {
-            printf("\nLogin failed! Please check your username and password.\n");
+            printf("\nLogin failed! Please check your username and password and try again.\n\n");
+            login();
         }
     return 0;
 }
