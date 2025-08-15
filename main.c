@@ -38,6 +38,60 @@ const Product products[] = {
 Order orders[100];
 int order_count = 0;
 
+unsigned long hash(char *str);
+int login();
+int display_orders();
+void display_products();
+void display_menu();
+void delete_order();
+void make_order();
+void search_order();
+void edit_order(Order *order);
+
+int main() {
+    if (login()) {
+        int option;
+        int flag = 1;
+        while(flag) {
+            display_menu();
+            scanf("%d", &option);
+            switch (option) {
+                case 1:
+                    display_orders();
+                    break;
+                case 2:
+                    make_order();
+                    break;
+                case 3:
+                    search_order();
+                    break;
+                case 4:
+                    int order_num;
+                    if(display_orders()) {
+                        printf("Select order to edit: ");
+                        scanf("%d", &order_num);
+                        Order *order_ptr = &orders[order_num - 1];
+                        edit_order(order_ptr);
+                    }
+                    break;
+                case 5:
+                    delete_order();
+                    break;
+                case 6:
+                    printf("Exiting the program. Goodbye!\n");
+                    flag = 0;
+                    break;
+                default:
+                    printf("\nInvalid option selected.\n\n");
+                }
+            }
+        } else {
+            printf("\nLogin failed! Please check your username and password and try again.\n\n");
+            login();
+        }
+    return 0;
+}
+
 /*
  * The Dan Bernstein popuralized hash..  See
  * https://github.com/pjps/ndjbdns/blob/master/cdb_hash.c#L26 Due to hash
@@ -110,16 +164,18 @@ int login() {
     }
 }
 
-void display_orders() {
+int display_orders() {
     printf("\nDisplaying all orders: \n\n");
     if (order_count == 0) {
         printf("No orders found.\n\n");
+        return 0;
     } else {
         for (int j = 0; j < order_count; j++) {
             printf("%d  - Name: %s,  Order ID: %ld, Total Price: $%.2f\n",
             j+1, orders[j].username, orders[j].order_id, orders[j].total_price);
         }
         printf("\n");
+        return 1;
     }
 }
 
@@ -144,7 +200,7 @@ void display_menu() {
     printf("1. Display all orders\n");
     printf("2. Create order\n");
     printf("3. Search from orders\n");
-    printf("4. Edit excisting order\n");
+    printf("4. Edit existing order\n");
     printf("5. Delete order\n");
     printf("6. Exit\n");
     printf("Please select an option: ");
@@ -202,6 +258,16 @@ void make_order() {
     }
 }
 
+void display_order(int order_num) {
+    printf("Name: %s\n", orders[order_num].username);
+    printf("Order ID: %ld\n", orders[order_num].order_id);
+    printf("Total Price: $%.2f\n", orders[order_num].total_price);
+    printf("Products in order:\n");
+    for(int j=0; j<orders[order_num].product_count; j++) {
+        printf("    %d) %s - $%.2f\n\n",j+1, orders[order_num].products[j].name, orders[order_num].products[j].price);
+    }
+}
+
 void search_order() {
     char search_id[50];
     printf("Enter Order ID or Username: ");
@@ -211,68 +277,27 @@ void search_order() {
         for(int i=0; i<order_count; i++) {
             if(orders[i].order_id == order_id) {
                 printf("\nOrder found!\n\n");
-                printf("Name: %s\n", orders[i].username);
-                printf("Order ID: %ld\n", orders[i].order_id);
-                printf("Total Price: $%.2f\n", orders[i].total_price);
-                printf("Products in order:\n");
-                for(int j=0; j<orders[i].product_count; j++) {
-                    printf("    %d) %s - $%.2f\n\n",j+1, orders[i].products[j].name, orders[i].products[j].price);
-                }
+                display_order(i);
                 break;
             }
         }
     } else {
         for(int i=0; i<order_count; i++) {
             if(strcmp(orders[i].username, search_id) == 0) {
-                printf("Order found:\n");
-                printf("Order ID: %ld\n", orders[i].order_id);
-                printf("Username: %s\n", orders[i].username);
-                printf("Total Price: $%.2f\n", orders[i].total_price);
-                printf("Products in order:\n");
-                for(int j=0; j<orders[i].product_count; j++) {
-                    printf("%s - $%.2f\n", orders[i].products[j].name, orders[i].products[j].price);
-                }
+                display_order(i);
                 break;
             }
         }
     }
 }
 
-int main() {
-    if (login()) {
-        int option;
-        int flag = 1;
-        while(flag) {
-            display_menu();
-            scanf("%d", &option);
-            switch (option) {
-                case 1:
-                    display_orders();
-                    break;
-                case 2:
-                    make_order();
-                    break;
-                case 3:
-                    search_order();
-                    break;
-                case 4:
-                    printf("Editing existing order...\n");
-                    // Here you would implement the logic to edit an existing order
-                    break;
-                case 5:
-                    delete_order();
-                    break;
-                case 6:
-                    printf("Exiting the program. Goodbye!\n");
-                    flag = 0;
-                    break;
-                default:
-                    printf("\nInvalid option selected.\n\n");
-                }
-            }
-        } else {
-            printf("\nLogin failed! Please check your username and password and try again.\n\n");
-            login();
-        }
-    return 0;
+void edit_order(Order *order) {
+    char new_name[50];
+    printf("Enter new name: ");
+    scanf("%s", new_name);
+
+    strcpy(order->username, new_name);
+    printf("Order edited successfully! \n\n");
+
+
 }
