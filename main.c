@@ -122,7 +122,6 @@ int login() {
     printf("Username: ");
     scanf("%s", username);
     fflush(stdin);
-    getchar();
 
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode;
