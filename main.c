@@ -164,6 +164,7 @@ int login() {
 }
 
 int display_orders() {
+    // read orders from file
     printf("\nDisplaying all orders: \n\n");
     if (order_count == 0) {
         printf("No orders found.\n\n");
@@ -219,6 +220,7 @@ void delete_order() {
         delete_order();
         return;
     } else {
+        // remove order from file
         for (int i = order_number - 1; i < order_count - 1; i++) {
             orders[i] = orders[i + 1];
         }
@@ -249,6 +251,7 @@ void make_order() {
         new_order.product_count += 1;
         new_order.products[0] = products[product_choice - 1];
         orders[order_count++] = new_order;
+        // add order to file
         printf("\nOrder created successfully!\n\n");
         printf("Name: %s\n", new_order.username);
         printf("Order ID: %ld\n", new_order.order_id);
@@ -308,6 +311,7 @@ void edit_order(Order *order) {
     printf("Enter new name: ");
     scanf("%s", new_name);
 
+    // edit order in file
     strcpy(order->username, new_name);
     printf("Order edited successfully! \n\n");
 }
