@@ -6,8 +6,7 @@
 #include <conio.h>
 #include <windows.h>
 #define NUM_BUCKETS 1000
-#define USERNAME "admin"
-#define PASSWORD "password"
+
 
 struct product {
     char name[50];
@@ -20,19 +19,17 @@ typedef struct product Product;
 struct order {
     char username[50];
     long order_id;
-    double total_price;
-    Product products[50];
-    int product_count;
-};
+    Product product;
+} default_order = {"", 0, {}};
 
 typedef struct order Order;
 
 const Product products[] = {
-    {"Starter Pack-(Pay-as-You-learn)", 1999.00, {"Access to 50+ beginner-level courses", "Downloadable learning materials", "Both mobile and dekstop access", "Progress tracking with insights and tips"}},
-    {"Professional Plan-(Career Booster)", 4999.00, {"Full course library (for all level", "Interactive quizzes and assignments", "Certificate after completion", "1 monthly live workshop"}},
-    {"Enterprise Plan-(Team Growth Package)", 7999.00, {"Unlimited access for teams", "Dedicated account manager", "Role-based learning paths", "Analytics & reporting dashboards"}},
-    {"Project-Based Learning Pack-(Pay-per-Project)", 4999.00, {"1 Guided real-world project", "Professional mentor feedback", "Portfolio showcase on platform"}},
-    {"Premium Plus Lifetime Plan", 14999.00, {"Lifetime access to all courses & materials", "Early VIP access to new contents", "Exclusive Q&A sessions with experts", "Accesss to project-based learning experiences anytime"}}
+    {"NimbusCore", 100.00, {"Scalable virtual compute instances (Nano to Ultra sizes)", "Auto-healing via health monitoring", "Built-in encryption at rest and in transit", "Quick-launch templates with preconfigured stacks (LAMP, Node.js, etc.)"}},
+    {"VultrixCompute", 150.00, {"Custom instance builder (CPU, RAM, Disk sliders)", "ISO-based custom OS support", "High availability with no additional configuration", "Built-in DDoS protection and traffic analysis"}},
+    {"CloudForge", 250.00, {"Optimized for containerized workloads (Docker & Kubernetes)", "Integrated GPU options for ML and rendering", "Spot instance marketplace with aggressive bidding", "Built-in CI/CD support for rapid deployment"}},
+    {"ElasticHive", 350.00, {"Intelligent auto-scaling based on real-time traffic", "Integrated APM (Application Performance Monitoring)", "Instance affinity for microservice clusters", "Spot, burstable, and dedicated instance classes"}},
+    {"SkyNode", 900.00, {"Developer-friendly CLI and web console", "One-click cloning and snapshotting of instances", "Instance sharing and collaborative development tools", "Configurable firewall and zero-trust networking"}}
 };
 
 Order orders[100];
@@ -47,8 +44,10 @@ void delete_order();
 void make_order();
 void search_order();
 void edit_order(Order *order);
+void load_orders();
 
 int main() {
+    load_orders();
     if (login()) {
         int option;
         int flag = 1;
@@ -86,19 +85,12 @@ int main() {
                 }
             }
         } else {
-            printf("\nLogin failed! Please check your username and password and try again.\n\n");
+            printf("\n\nLogin failed! Please check your username and password and try again.\n\n");
             login();
         }
     return 0;
 }
 
-/*
- * The Dan Bernstein popuralized hash..  See
- * https://github.com/pjps/ndjbdns/blob/master/cdb_hash.c#L26 Due to hash
- * collisions it seems to be replaced with "siphash" in n-djbdns, see
- * https://github.com/pjps/ndjbdns/commit/16cb625eccbd68045737729792f09b4945a4b508
- * Djb2 hash function
- */
 unsigned long hash(char *str) {
     unsigned long hash = 5381;
     int c;
@@ -108,21 +100,19 @@ unsigned long hash(char *str) {
 }
 
 int login() {
-    char username[50];
-    char password[50];
+    char username[50], saved_username[50], password[50], saved_password[50];
     FILE *file;
 
-    file = fopen("login.txt", "w");
-    fprintf(file,"%ld", hash(PASSWORD));
+    file = fopen("login.txt", "r");
+    fscanf(file, "%s\n%s", saved_username, saved_password);
     fclose(file);
 
 
-    printf("Welcome to Cloud9 Systems! \n\n");
+    printf("Welcome to Cloud 9 Systems! \n\n");
     printf("Login: \n");
     printf("Username: ");
     scanf("%s", username);
     fflush(stdin);
-    getchar();
 
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode;
@@ -152,15 +142,50 @@ int login() {
         printf("Error opening file!\n");
         return 1;
     }
-    char saved_password[50];
-    fscanf(file, "%s", saved_password);
-    fclose(file);
+    
 
-    if(strcmp(username, USERNAME) == 0 && hash(password) == atoi(saved_password)) {
+    if(strcmp(username, saved_username) == 0 && hash(password) == atoi(saved_password)) {
         printf("\n\nLogin successful!\nHello, %s!\n\n", username);
         return 1;
     } else {
         return 0;
+    }
+}
+
+void load_orders() {
+    FILE *file;
+    file = fopen("orders.txt", "r");
+    if(file) {
+        char name[50];
+        int id, i=0;
+        Product prod;
+        float price;
+        char product_name[50];
+        while(fscanf(file,"Name: %s\nOrder ID: %d\nProduct:\nName: %s\nPrice: %f\n\n",
+         name, &id, product_name, &price) == 4) {
+            strcpy(prod.name, product_name);
+            prod.price = price;
+            Order order;
+            strcpy(order.username, name);
+            order.order_id = id;
+            order.product = prod;
+            orders[i++] = order;
+            if(feof(file) == 1) {
+                break;
+            }
+        }
+        order_count = i;
+    } else {
+        return;
+    }
+}
+
+void write_orders(Order orders[100]) {
+    FILE *file;
+    file = fopen("orders.txt", "w");
+    for(int i=0; i<order_count; i++) {
+        fprintf(file, "Name: %s\nOrder ID: %d\nProduct:\nName: %s\nPrice: %.2f\n\n",
+             orders[i].username, orders[i].order_id, orders[i].product.name, orders[i].product.price);
     }
 }
 
@@ -171,8 +196,10 @@ int display_orders() {
         return 0;
     } else {
         for (int j = 0; j < order_count; j++) {
-            printf("%d  - Name: %s,  Order ID: %ld, Total Price: $%.2f\n",
-            j+1, orders[j].username, orders[j].order_id, orders[j].total_price);
+            printf("%d  - Name: %s,  Order ID: %ld, Total Price: $%.2f, Product: ",
+            j+1, orders[j].username, orders[j].order_id, orders[j].product.price);
+            printf("%s  ", orders[j].product.name);
+            printf("\n");
         }
         printf("\n");
         return 1;
@@ -182,7 +209,7 @@ int display_orders() {
 void display_products() {
     printf("Available Products:\n\n");
     for (int i = 0; i < sizeof(products) / sizeof(products[0]); i++) {
-        printf("%d. %s - $%.2f\n", i + 1, products[i].name, products[i].price);
+        printf("%d. %s - TK. %.2f\n", i + 1, products[i].name, products[i].price);
         printf("\n   Features:\n");
         for (int j = 0; j < 4; j++) {
             if (strlen(products[i].features[j]) == 0) {
@@ -224,6 +251,7 @@ void delete_order() {
             orders[i] = orders[i + 1];
         }
         order_count--;
+        write_orders(orders);
         printf("\nOrder deleted successfully.\n\n");
     }
 }
@@ -235,37 +263,42 @@ void make_order() {
     int product_choice;
     scanf("%d", &product_choice);
     if (product_choice < 1 || product_choice > 5) {
-        printf("Invalid product selection.\n");
+        printf("Invalid product selection. Try again.\n");
         make_order();
     } else {
         char username[50];
-        printf("Enter Username: ");
+        printf("Enter Name: ");
         scanf("%s", username);
         printf("You selected: %s - $%.2f\n", products[product_choice - 1].name, products[product_choice - 1].price);
-        Order new_order;
+        Order new_order = default_order;
         strcpy(new_order.username, username);
         new_order.order_id = rand() % 1000000;
-        new_order.total_price = products[product_choice - 1].price;
-        new_order.product_count += 1;
-        new_order.products[0] = products[product_choice - 1];
+        new_order.product = products[product_choice-1];
         orders[order_count++] = new_order;
+        FILE *fp;
+        fp = fopen("orders.txt","a");
+        if(fp) {
+            fprintf(fp,"Name: %s\nOrder ID: %d\n", new_order.username, new_order.order_id);
+            fprintf(fp,"Product:\nName: %s\nPrice: %.2f\n\n", new_order.product.name, new_order.product.price); 
+        } else {
+            printf("\nError opening file.\n");
+        }
+        fclose(fp);
+
         printf("\nOrder created successfully!\n\n");
         printf("Name: %s\n", new_order.username);
         printf("Order ID: %ld\n", new_order.order_id);
-        printf("Products in order:\n");
-        printf("%s - $%.2f\n", new_order.products[0].name, new_order.products[0].price);
-        printf("Total Price: $%.2f\n\n", new_order.total_price);
+        printf("Product in order:\n");
+        printf("%s - $%.2f\n\n", new_order.product.name, new_order.product.price);
     }
 }
 
 void display_order(int order_num) {
     printf("Name: %s\n", orders[order_num].username);
     printf("Order ID: %ld\n", orders[order_num].order_id);
-    printf("Total Price: $%.2f\n", orders[order_num].total_price);
-    printf("Products in order:\n");
-    for(int j=0; j<orders[order_num].product_count; j++) {
-        printf("    %d) %s - $%.2f\n\n",j+1, orders[order_num].products[j].name, orders[order_num].products[j].price);
-    }
+    printf("Product in order:\n");
+    printf("    I) %s - $%.2f\n\n", orders[order_num].product.name, orders[order_num].product.price);
+    
 }
 
 void search_order() {
@@ -282,20 +315,34 @@ void search_order() {
             }
         }
     } else {
+        int flag = 0;
+        printf("\nOrders Found: \n\n");
         for(int i=0; i<order_count; i++) {
-            if(strcmp(orders[i].username, search_id) == 0) {
-                display_order(i);
-                break;
+            for(int j=0; j<strlen(search_id); j++) {
+                if(search_id[j] == orders[i].username[j]) {
+                    flag = 1;
+                } else {
+                    flag = 0;
+                    break;
+                }
             }
+            if(flag) {
+                display_order(i);
+            }
+        }
+        if(!flag) {
+            printf("No orders found!\n\n");
         }
     }
 }
 
 void edit_order(Order *order) {
     char new_name[50];
+    int id;
     printf("Enter new name: ");
     scanf("%s", new_name);
 
     strcpy(order->username, new_name);
-    printf("Order edited successfully! \n\n");
+    write_orders(orders);
+    printf("\nSuccessfully edited the order!\n\n");
 }
