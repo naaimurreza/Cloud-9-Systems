@@ -66,8 +66,8 @@ int main() {
                     search_order();
                     break;
                 case 4:
-                    int order_num;
                     if(display_orders()) {
+                        int order_num;
                         printf("Select order to edit: ");
                         scanf("%d", &order_num);
                         Order *order_ptr = &orders[order_num - 1];
