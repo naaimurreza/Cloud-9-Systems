@@ -190,7 +190,6 @@ void write_orders(Order orders[100]) {
 }
 
 int display_orders() {
-    // read orders from file
     printf("\nDisplaying all orders: \n\n");
     if (order_count == 0) {
         printf("No orders found.\n\n");
@@ -248,7 +247,6 @@ void delete_order() {
         delete_order();
         return;
     } else {
-        // remove order from file
         for (int i = order_number - 1; i < order_count - 1; i++) {
             orders[i] = orders[i + 1];
         }
@@ -265,13 +263,8 @@ void make_order() {
     int product_choice;
     scanf("%d", &product_choice);
     if (product_choice < 1 || product_choice > 5) {
-<<<<<<< HEAD
         printf("Invalid product selection. Try again.\n");
-=======
-        printf("Invalid product selection. adminTry again.\n");
->>>>>>> f420c0e0aebd629802f58451be3607aa46a98f42
         make_order();
-
     } else {
         char username[50];
         printf("Enter Name: ");
@@ -282,7 +275,6 @@ void make_order() {
         new_order.order_id = rand() % 1000000;
         new_order.product = products[product_choice-1];
         orders[order_count++] = new_order;
-<<<<<<< HEAD
         FILE *fp;
         fp = fopen("orders.txt","a");
         if(fp) {
@@ -292,10 +284,6 @@ void make_order() {
             printf("\nError opening file.\n");
         }
         fclose(fp);
-
-=======
-        // add order to file
->>>>>>> f420c0e0aebd629802f58451be3607aa46a98f42
         printf("\nOrder created successfully!\n\n");
         printf("Name: %s\n", new_order.username);
         printf("Order ID: %ld\n", new_order.order_id);
@@ -307,17 +295,8 @@ void make_order() {
 void display_order(int order_num) {
     printf("Name: %s\n", orders[order_num].username);
     printf("Order ID: %ld\n", orders[order_num].order_id);
-<<<<<<< HEAD
     printf("Product in order:\n");
-    printf("    I) %s - $%.2f\n\n", orders[order_num].product.name, orders[order_num].product.price);
-    
-=======
-    printf("Total Price: $%.2f\n", orders[order_num].total_price);
-    printf("Products in order:\n");
-    for(int j=0; j<orders[order_num].product_count+1; j++) {
-        printf("    %d) %s - $%.2f\n\n",j+1, orders[order_num].products[j].name, orders[order_num].products[j].price);
-    }
->>>>>>> f420c0e0aebd629802f58451be3607aa46a98f42
+    printf("%s - $%.2f\n\n", orders[order_num].product.name, orders[order_num].product.price);
 }
 
 void search_order() {
@@ -326,23 +305,22 @@ void search_order() {
     scanf("%s", search_id);
     if(isdigit(search_id[0])) {
         long order_id = atol(search_id);
+        printf("\nOrders found:\n\n");
         for(int i=0; i<order_count; i++) {
             if(orders[i].order_id == order_id) {
-                printf("\nOrder found!\n\n");
                 display_order(i);
                 break;
             }
         }
     } else {
         int flag = 0;
-        printf("\nOrders Found: \n\n");
+        printf("\nOrders Found:\n\n");
         for(int i=0; i<order_count; i++) {
             for(int j=0; j<strlen(search_id); j++) {
                 if(search_id[j] == orders[i].username[j]) {
                     flag = 1;
                 } else {
                     flag = 0;
-                    break;
                 }
             }
             if(flag) {
@@ -360,8 +338,6 @@ void edit_order(Order *order) {
     int id;
     printf("Enter new name: ");
     scanf("%s", new_name);
-
-    // edit order in file
     strcpy(order->username, new_name);
     write_orders(orders);
     printf("\nSuccessfully edited the order!\n\n");
