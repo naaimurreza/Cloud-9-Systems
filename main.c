@@ -78,7 +78,13 @@ int main() {
                     delete_order();
                     break;
                 case 6:
-                    printf("Exiting the program. Goodbye!\n");
+                    printf("\t\t\t\t\t\t\tExiting the program.\n");
+                    printf("\t\t\t\t\t\t  ____                 _ _                _ \n");
+                    printf("\t\t\t\t\t\t / ___| ___   ___   __| | |__  _   _  ___| |\n");
+                    printf("\t\t\t\t\t\t| |  _ / _ \\ / _ \\ / _` | '_ \\| | | |/ _ \\ |\n");
+                    printf("\t\t\t\t\t\t| |_| | (_) | (_) | (_| | |_) | |_| |  __/_|\n");
+                    printf("\t\t\t\t\t\t \\____|\\___/ \\___/ \\__,_|_.__/ \\__, |\\___(_)\n");
+                    printf("\t\t\t\t\t\t                               |___/        \n");
                     flag = 0;
                     break;
                 default:
